@@ -13,6 +13,13 @@ License: GPLv2 or later
 */
 
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+
+
 add_action('admin_bar_menu', function( $wp_admin_bar ){
 	
 	if ( is_admin() ) {

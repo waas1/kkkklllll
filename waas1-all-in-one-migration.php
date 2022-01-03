@@ -136,3 +136,6 @@ function waas1_exclude_other_folders( $foldersToSkip ){
 	return $foldersToSkip;
 	
 }
+
+
+?>

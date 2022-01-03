@@ -932,3 +932,4 @@ function waas1_list_repo_version( $type, $args ){
 
 
 
+?>

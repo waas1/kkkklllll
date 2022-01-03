@@ -16,6 +16,12 @@
  * Text Domain:       wp-rest-cache
  * Domain Path:       /languages
  */
+ 
+ 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Make sure plugin functions are loaded.
@@ -27,3 +33,6 @@ if ( is_plugin_active( 'wp-rest-cache/wp-rest-cache.php' ) ) {
 	$wp_rest_cache_api = new \WP_Rest_Cache_Plugin\Includes\API\Endpoint_Api();
 	$wp_rest_cache_api->get_api_cache();
 }
+
+
+?>

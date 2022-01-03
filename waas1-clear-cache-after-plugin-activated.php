@@ -36,3 +36,6 @@ add_action( 'activate_plugin', function(){
 	}
 	
 },10, 1 );
+
+
+?>

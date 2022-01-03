@@ -13,9 +13,8 @@ License: GPLv2 or later
 */
 
 
-// Make sure we don't expose any info if called directly
-if ( !function_exists( 'add_action' ) ) {
-	echo 'Hi there!  I\'m just a plugin, not much I can do when called directly.';
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
@@ -53,3 +52,4 @@ function waas1_intermediate_image_sizes_advanced( $sizes ) {
 }
 
 
+?>

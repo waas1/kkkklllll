@@ -13,6 +13,12 @@ License: GPLv2 or later
 */
 
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+
 //https://github.com/herewithme/wp-filters-extras/blob/master/wp-filters-extras.php
 
 /**
@@ -132,13 +138,4 @@ add_action( 'template_redirect', function(){
 
 
 
-
-
-
-
-
-
-
-
-
-
+?>

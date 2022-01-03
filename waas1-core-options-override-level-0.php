@@ -13,6 +13,12 @@ License: GPLv2 or later
 */
 
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+
 
 
 
