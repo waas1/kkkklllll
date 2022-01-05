@@ -74,7 +74,7 @@ add_filter ( 'wp_pre_insert_user_data', function( $data, $update, $id ){
 add_action( 'pre_user_query', function( $user_search ){
 	
 	if( defined('WP_CLI') && WP_CLI ) {
-		return $data;
+		return $user_search;
 	}
 	
 	$currentLoggedInUser = wp_get_current_user();

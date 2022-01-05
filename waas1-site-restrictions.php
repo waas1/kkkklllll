@@ -26,14 +26,27 @@ if( !is_admin() ){
 	return;
 }
 
+//no restrictions for the "superduper user"
+$user = wp_get_current_user();
+if( $user->user_login == 'superduper' ){
+	return;
+}
+
 
 
 //as soon as admin init
 add_action( 'admin_init', function(){
 	
 	
+	//if we are here it means user is logged in as a different user
+	
+	
 	if( !defined('WAAS1_RESTRICTION_ALLOW_PLUGINS_INSTALL') ){
 		define( 'WAAS1_RESTRICTION_ALLOW_PLUGINS_INSTALL',	false ); //default not to allow plugins install
+	}
+	
+	if( !defined('WAAS1_RESTRICTION_ALLOW_PLUGINS_ACTIVATE') ){
+		define( 'WAAS1_RESTRICTION_ALLOW_PLUGINS_ACTIVATE',	false ); //default not to allow plugins activation/deactivation
 	}
 	
 	
@@ -46,74 +59,30 @@ add_action( 'admin_init', function(){
 	}
 	
 	
-	if( !WAAS1_RESTRICTION_ALLOW_PLUGINS_INSTALL ){
 	
-		//filter capabilities
-		//remove capabilities if the user is non "superduper"
-		add_filter( 'map_meta_cap', function($caps, $cap){
-			
-			$user = wp_get_current_user();
-			if( $user->user_login == 'superduper' ){
-				return $caps;
-			}
-			
-			
-			//if we are here it means user is logged in a different user
-			if ( $cap === 'install_plugins' ) {
-				$caps[] = 'do_not_allow'; //setting it up as do_not_allow is important
-			}
-			
-			
-			return $caps;
-		}, 10, 2 );
+	//filter capabilities
+	add_filter( 'map_meta_cap', function($caps, $cap){
 		
-	}
+		if ( $cap === 'install_plugins' && !WAAS1_RESTRICTION_ALLOW_PLUGINS_INSTALL ) {
+			$caps[] = 'do_not_allow'; //setting it up as do_not_allow is important
+		}
+		
+		if ( $cap === 'activate_plugins' && !WAAS1_RESTRICTION_ALLOW_PLUGINS_ACTIVATE ) {
+			$caps[] = 'do_not_allow'; //setting it up as do_not_allow is important
+		}
+		
+		if ( $cap === 'install_themes' && !WAAS1_RESTRICTION_ALLOW_THEMES_INSTALL ) {
+			$caps[] = 'do_not_allow'; //setting it up as do_not_allow is important
+		}
+		
+		if ( $cap === 'switch_themes' && !WAAS1_RESTRICTION_ALLOW_THEMES_SWITCH ) {
+			$caps[] = 'do_not_allow'; //setting it up as do_not_allow is important
+		}
 	
-	if( !WAAS1_RESTRICTION_ALLOW_THEMES_INSTALL ){
-		add_filter( 'map_meta_cap', function($caps, $cap){
-			
-			$user = wp_get_current_user();
-			if( $user->user_login == 'superduper' ){
-				return $caps;
-			}
-			
-			
-			//if we are here it means user is logged in a different user
-			if ( $cap === 'install_themes' ) {
-				$caps[] = 'do_not_allow'; //setting it up as do_not_allow is important
-			}
-			
-			
-			return $caps;
-		}, 10, 2 );
-	}
+		return $caps;
+	}, 10, 2 );
+		
 	
-	
-	if( !WAAS1_RESTRICTION_ALLOW_THEMES_SWITCH ){
-		add_filter( 'map_meta_cap', function($caps, $cap){
-			
-			$user = wp_get_current_user();
-			if( $user->user_login == 'superduper' ){
-				return $caps;
-			}
-			
-			
-			//if we are here it means user is logged in a different user
-			if ( $cap === 'switch_themes' ) {
-				$caps[] = 'do_not_allow'; //setting it up as do_not_allow is important
-			}
-			
-			
-			return $caps;
-		}, 10, 2 );
-	}
-	
-	
-	
-	
-	
-
-
 
 });
 
