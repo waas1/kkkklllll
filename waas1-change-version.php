@@ -601,9 +601,9 @@ function waas1_change_version_api_call( $type, $args ){
 	//	// Force refresh of themes update information.
 	//	wp_clean_themes_cache();
 	//}
-	if( function_exists('w3tc_flush_all') ){
-		w3tc_flush_all();
-	}
+	//if( function_exists('w3tc_flush_all') ){
+	//	w3tc_flush_all();
+	//}
 	
 	
 	$html .= '<p>successfully changed the  Version from ('.$args['installed_version'].') to ('.$args['new_version'].')</p>';

@@ -13,23 +13,25 @@ License: GPLv2 or later
 */
 
 
-
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 
+//if the call is from "wp-cli" don't run the code below
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	return;
+}
+
+
 //do not allow to delete superduper
 add_action( 'delete_user', function( $id ) {
 	
-	if ( defined( 'WP_CLI' ) && WP_CLI ) {
-		return true;
-	}
-	
+
 	$currentLoggedInUser = wp_get_current_user();
 	if( $currentLoggedInUser->data->user_login == 'superduper' ){
-		return true;
+		return;
 	}
 	
 	
@@ -38,8 +40,7 @@ add_action( 'delete_user', function( $id ) {
 		wp_redirect( admin_url() );
         exit();
 	}
-	
-	return true;
+
 	
 });
 
