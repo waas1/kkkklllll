@@ -83,7 +83,6 @@ function waas1_exclude_plugins_folders( $foldersToSkip ){
 	$foldersToSkip[] = 'mainwp-child';
 	$foldersToSkip[] = 'one-time-login';
 	$foldersToSkip[] = 'resmushit-image-optimizer';
-	$foldersToSkip[] = 'admin-2020';
 	$foldersToSkip[] = 'updraftplus';
 	$foldersToSkip[] = 'w3-total-cache';
 	$foldersToSkip[] = 'wp-rest-cache';
