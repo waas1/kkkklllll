@@ -36,23 +36,29 @@ function waas1_client_wp_pre_insert_user_data( $data, $update, $id, $userdata ){
 		return $data;
 	}
 	
-	//do not process anything if nothing is being updated
+	//allow if data is not being updated
 	if( !$update ){
 		return $data;
 	}
 	
+	
+	$userToChange = get_user_by( 'id', $id );
+	$userToChangeEmail = $userToChange->data->user_email;
 	//if the user is other than client email allow to change the email
-	if( $currentLoggedInUser->data->user_email != WAAS1_CLIENT_EMAIL ){
+	if( $userToChangeEmail != WAAS1_CLIENT_EMAIL ){
 		return $data;
 	}
 	
+
+	
 	//otherwise do not allow to change the email
-	$old_email = $currentLoggedInUser->data->user_email;
+	$old_email = $userToChangeEmail;
 	$new_email = $data['user_email'];
 	
 	if( $old_email != $new_email ){
 		$data['user_email'] = $old_email;
 	}
+	
 	return $data;
 	
 }
@@ -69,9 +75,8 @@ function waas1_client_send_email_change_email( $send, $user, $userdata ){
 		return $send;
 	}
 	
-	
 	//if the user is other than client email allow to send email
-	if( $currentLoggedInUser->data->user_email != WAAS1_CLIENT_EMAIL ){
+	if( $user['user_email'] != WAAS1_CLIENT_EMAIL ){
 		return $send;
 	}
 	
