@@ -29,17 +29,28 @@ add_filter( 'updraftplus_exclude_directory', function( $filter, $fullPath, $stor
 	
 	$explodedStoredPath = explode( '/', $storedPath );
 	
+	$foldersToSkipArray = array( 'mu-plugins', 'w3tc-config' );
+	
+	if( isset($explodedStoredPath[0]) ){
+		if( in_array($explodedStoredPath[0], $foldersToSkipArray) ){
+			return true;
+		}
+	}
+	
+	
 	if( !isset($explodedStoredPath[1]) ){
 		return false;
 	}
 	
 	$checkPath = WP_CONTENT_DIR.'/'.$explodedStoredPath[0].'/'.$explodedStoredPath[1];
 	
+	
 	$isLink = is_link( $checkPath );
 
 	if( $isLink ){
 		return true;
 	}else{
+		
 		return false;
 	}
 	
@@ -47,8 +58,7 @@ add_filter( 'updraftplus_exclude_directory', function( $filter, $fullPath, $stor
 
 
 
-
-
+//restore -- this will only short circute plugins and themes dirs.
 add_filter( 'updraft_move_existing_to_old_short_circuit', function( $circuit, $type ){
 	return true;
 }, 10, 2 );
