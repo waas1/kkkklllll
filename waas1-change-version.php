@@ -235,8 +235,6 @@ add_filter( 'wp_prepare_themes_for_js', function( $prepared_themes ){
 		//now check if we have versions in our repo
 		$result = waas1_check_if_we_have_repo( 'theme', $args );
 		
-		
-	
 		if( $result == false ){
 			$prepared_themes[$key]['waas1_repo'] = false;
 		}else{
@@ -268,6 +266,8 @@ add_filter( 'wp_prepare_themes_for_js', function( $prepared_themes ){
 				$prepared_themes[$key]['waas1_repo_dirs'] = $dirs;
 				
 				if( $dirs[0] == '999.999.999.999.999' ){
+					$gitRepoThemeVersion = $dirs[1];
+				}elseif( $dirs[0] == 'main' ){
 					$gitRepoThemeVersion = $dirs[1];
 				}else{
 					$gitRepoThemeVersion = $dirs[0];
@@ -371,6 +371,8 @@ add_filter( 'plugin_action_links', function ( $actions, $plugin_file, $plugin_da
 	}
 	
 	if( $dirs[0] == '999.999.999.999.999' ){
+		$gitRepoPluginVersion = $dirs[1];
+	}elseif( $dirs[0] == 'main' ){
 		$gitRepoPluginVersion = $dirs[1];
 	}else{
 		$gitRepoPluginVersion = $dirs[0];
@@ -491,21 +493,37 @@ function waas1_change_version_build_admin_page() {
 function waas1_change_version_api_call( $type, $args ){
 	
 	
+	$dirs = waas1_list_repo_version( $type, $args );
+	$linkedWithMain = false;
+	
 	$html = '';
 	$html .= '<div class="wrap"> <div class="wpr-content-wrap">';
 	$html .= '<h1>Change Version: '.$args['rollback_name'].'</h1>';
 	
 	
-	
-	
 	//if plugin starts
 	if( $type == 'plugin' ){
 		
+		foreach( $dirs as $dir ){
+			if( $dir == '999.999.999.999.999' ){
+				$result = readlink( WP_PLUGIN_DIR.'/'.$args['slug'] );
+				if( strpos($result, '999.999.999.999.999') !== false ){
+					$linkedWithMain = true;
+				}
+			}
+			if( $dir == 'main' ){
+				$result = readlink( WP_PLUGIN_DIR.'/'.$args['slug'] );
+				if( strpos($result, 'main') !== false ){
+					$linkedWithMain = true;
+				}
+			}
+		}
+		
 		//setup vars
 		$backButtonHtml = '<a style="margin-top:5%;" href="'.admin_url( '/plugins.php' ).'" class="button-primary">Back to plugins</a>';
-	
 		
-		if( $args['installed_version'] == $args['new_version'] ){
+
+		if( $args['installed_version'] == $args['new_version'] && $linkedWithMain == false ){
 			$html .= '<p>Plugin is already at version: '.$args['new_version'].'</p>';
 			$html .= '<p>No action taken...</p>';
 			$html .= '</div></div>';
@@ -536,8 +554,12 @@ function waas1_change_version_api_call( $type, $args ){
 		//	$html .= '<span>Plugin is not currently active.</span>';
 		//}
 		
+		if( $linkedWithMain ){
+			$html .= '<p>Changing Version from (main) to ('.$args['new_version'].')</p>';
+		}else{
+			$html .= '<p>Changing Version from ('.$args['installed_version'].') to ('.$args['new_version'].')</p>';
+		}
 		
-		$html .= '<p>Changing Version from ('.$args['installed_version'].') to ('.$args['new_version'].')</p>';
 
 		//$html .= '<p>Removing Version ('.$args['installed_version'].')</p>';
 		//if( is_link(WP_PLUGIN_DIR.'/'.$args['slug']) ){
@@ -548,11 +570,26 @@ function waas1_change_version_api_call( $type, $args ){
 		
 	}else{
 		
+		foreach( $dirs as $dir ){
+			if( $dir == '999.999.999.999.999' ){
+				$result = readlink( WP_CONTENT_DIR.get_theme_roots().'/'.$args['slug'] );
+				if( strpos($result, '999.999.999.999.999') !== false ){
+					$linkedWithMain = true;
+				}
+			}
+			if( $dir == 'main' ){
+				$result = readlink( WP_CONTENT_DIR.get_theme_roots().'/'.$args['slug'] );
+				if( strpos($result, 'main') !== false ){
+					$linkedWithMain = true;
+				}
+			}
+		}
+		
 		//setup vars
 		$backButtonHtml = '<a style="margin-top:5%;" href="'.admin_url( '/themes.php' ).'" class="button-primary">Back to themes</a>';
 		
 		
-		if( $args['installed_version'] == $args['new_version'] ){
+		if( $args['installed_version'] == $args['new_version'] && $linkedWithMain == false ){
 			$html .= '<p>Theme is already at version: '.$args['new_version'].'</p>';
 			$html .= '<p>No action taken...</p>';
 			$html .= '</div></div>';
@@ -592,7 +629,6 @@ function waas1_change_version_api_call( $type, $args ){
 		
 	}
 	
-
 	
 	$workerApiResponse = json_decode( $waas1WorkerApi->getResponse() );
 	if( !$workerApiResponse->status ){
@@ -605,29 +641,12 @@ function waas1_change_version_api_call( $type, $args ){
 	}
 	
 	
-	
-	//finally activate the plugin if it was active before
-	//if( $isActive ){
-	//	activate_plugin( $args['file'] );
-	//}
-	
-	
-	
-	
-	//if( $type == 'plugin' ){
-	//	// Force refresh of plugin update information.
-	//	wp_clean_plugins_cache();
-	//}else{
-	//	// Force refresh of themes update information.
-	//	wp_clean_themes_cache();
-	//}
-	//if( function_exists('w3tc_flush_all') ){
-	//	w3tc_flush_all();
-	//}
-	
-	
-	$html .= '<p>successfully changed the  Version from ('.$args['installed_version'].') to ('.$args['new_version'].')</p>';
-	
+	if( $linkedWithMain ){
+		$html .= '<p>Changing Version from (main) to ('.$args['new_version'].')</p>';
+	}else{
+		$html .= '<p>Changing Version from ('.$args['installed_version'].') to ('.$args['new_version'].')</p>';
+	}
+
 	$html .= '</div></div>';
 	$html .= $backButtonHtml;
 	
@@ -840,10 +859,11 @@ function waas1_check_if_we_have_repo( $type, $args ){
 		
 		if( file_exists( WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.'/'.$args['slug'].'/versions.ini' ) ){
 			return true;
-		}else{
-			return false;
 		}
-		
+		if( file_exists( WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.'/'.$args['slug'].'/.gitworktree' ) ){
+			return true;
+		}
+		return false;
 	}
 	
 	
@@ -851,9 +871,11 @@ function waas1_check_if_we_have_repo( $type, $args ){
 		
 		if( file_exists( WAAS1_CHANGE_VERSION_THEME_REPO_DIR.'/'.$args['slug'].'/versions.ini' ) ){
 			return true;
-		}else{
-			return false;
 		}
+		if( file_exists( WAAS1_CHANGE_VERSION_THEME_REPO_DIR.'/'.$args['slug'].'/.gitworktree' ) ){
+			return true;
+		}
+		return false;
 		
 	}
 	
@@ -877,6 +899,7 @@ function waas1_change_version_versions_select( $type, $args ){
 	
 	
 	$html = '<ul class="wpr-version-list">';
+	$linkedWithMain = false;
 	
 	if( $type == 'plugin' ){
 		
@@ -887,16 +910,30 @@ function waas1_change_version_versions_select( $type, $args ){
 				   $html .= '<input type="radio" value="' .$dir. '" name="new_version">';
 				   $html .=  $dir;
 				   
-		
+					
 					if( $dir == '999.999.999.999.999' ){
 						$result = readlink( WP_PLUGIN_DIR.'/'.$args['slug'] );
 						if( strpos($result, '999.999.999.999.999') !== false ){
-							$html .= '<span class="current-version">Linked</span>';
+							$linkedWithMain = true;
+							$html .= '<span class="current-version">Installed</span>';
 						}
 					}
+					
+					if( $dir == 'main' ){
+						$result = readlink( WP_PLUGIN_DIR.'/'.$args['slug'] );
+						if( strpos($result, 'main') !== false ){
+							$linkedWithMain = true;
+							$html .= '<span class="current-version">Installed</span>';
+						}
+					}
+				
 	
 				   if( $args['installed_version'] == $dir ){
-					   $html .= '<span class="current-version">Installed Version</span>';
+					   if( $linkedWithMain ){
+							$html .= '<span class="current-version"><--- Base Version</span>';
+					   }else{
+						   $html .= '<span class="current-version">Installed Version</span>';
+					   }
 				   }
 				   
 				 $html .= '</label>';
@@ -919,13 +956,28 @@ function waas1_change_version_versions_select( $type, $args ){
 				   if( $dir == '999.999.999.999.999' ){
 						$result = readlink( WP_CONTENT_DIR.get_theme_roots().'/'.$args['slug'] );
 						if( strpos($result, '999.999.999.999.999') !== false ){
-							$html .= '<span class="current-version">Linked</span>';
+							$linkedWithMain = true;
+							$html .= '<span class="current-version">Installed</span>';
+						}
+					}
+					
+					if( $dir == 'main' ){
+						$result = readlink( WP_CONTENT_DIR.get_theme_roots().'/'.$args['slug'] );
+						if( strpos($result, 'main') !== false ){
+							$linkedWithMain = true;
+							$html .= '<span class="current-version">Installed</span>';
 						}
 					}
 					
 				   if( $args['installed_version'] == $dir ){
-					   $html .= '<span class="current-version">Installed Version</span>';
+					   if( $linkedWithMain ){
+							$html .= '<span class="current-version"><--- Base Version</span>';
+					   }else{
+						   $html .= '<span class="current-version">Installed Version</span>';
+					   }
 				   }
+				   
+				   
 				 $html .= '</label>';
 			   $html .= '</li>';
 		   }
@@ -950,14 +1002,61 @@ function waas1_change_version_versions_select( $type, $args ){
 function waas1_list_repo_version( $type, $args ){
 	
 	if( $type == 'plugin' ){
-		$versions = parse_ini_file( WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.'/'.$args['slug'].'/versions.ini', false, INI_SCANNER_TYPED );
+		
+		$file = WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.'/'.$args['slug'].'/versions.ini';
+		if( file_exists($file) ){
+			$versions = parse_ini_file( $file, false, INI_SCANNER_TYPED );
+			return $versions['versions'];
+		}
+		
+		$file = WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.'/'.$args['slug'].'/.gitworktree';
+		$dirToScan = WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.'/'.$args['slug'].'/';
+		
+		if( file_exists($file) ){
+			$scanDir = scandir( $dirToScan );
+			$scanDir = array_diff( $scanDir, array( '.', '..', '.gitworktree' ) );
+			sort($scanDir, SORT_NUMERIC);
+			$scanDir = array_reverse( $scanDir );
+			
+			if( in_array('main', $scanDir) ){
+				array_pop( $scanDir ); //remove the last element as main will always be last
+				array_unshift( $scanDir , 'main' ); //add the main to the very top now
+			}
+			return $scanDir;
+		}
+
 	}
+	
+	
 	
 	if( $type == 'theme' ){
-		$versions = parse_ini_file( WAAS1_CHANGE_VERSION_THEME_REPO_DIR.'/'.$args['slug'].'/versions.ini', false, INI_SCANNER_TYPED );
+		
+		$file = WAAS1_CHANGE_VERSION_THEME_REPO_DIR.'/'.$args['slug'].'/versions.ini';
+		if( file_exists($file) ){
+			$versions = parse_ini_file( $file, false, INI_SCANNER_TYPED );
+			return $versions['versions'];
+		}
+		
+		$file = WAAS1_CHANGE_VERSION_THEME_REPO_DIR.'/'.$args['slug'].'/.gitworktree';
+		$dirToScan = WAAS1_CHANGE_VERSION_THEME_REPO_DIR.'/'.$args['slug'].'/';
+		$dirToScan = WAAS1_CHANGE_VERSION_THEME_REPO_DIR.'/'.$args['slug'].'/';
+		
+		if( file_exists($file) ){
+			$scanDir = scandir( $dirToScan );
+			$scanDir = array_diff( $scanDir, array( '.', '..', '.gitworktree' ) );
+			sort($scanDir, SORT_NUMERIC);
+			$scanDir = array_reverse( $scanDir );
+			
+			if( in_array('main', $scanDir) ){
+				array_pop( $scanDir ); //remove the last element as main will always be last
+				array_unshift( $scanDir , 'main' ); //add the main to the very top now
+			}
+			return $scanDir;
+		}
+		
 	}
 	
-	return $versions['versions'];
+	return false;
 }
 
 
