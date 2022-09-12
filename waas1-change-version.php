@@ -273,12 +273,17 @@ add_filter( 'wp_prepare_themes_for_js', function( $prepared_themes ){
 					$gitRepoThemeVersion = $dirs[0];
 				}
 				
-				
-				if( version_compare($gitRepoThemeVersion, $theme['version'], '>' ) ){
-					$changeVersionText = '<div class="change-repo-version change-repo-important"><a href="' . esc_url( $changeVersion_url ) . '">New Version Available</a></div>';
+				if( $gitRepoThemeVersion == '999.999.999.999.999' ){
+					$changeVersionText = '<div class="change-repo-version"><a href="' . esc_url( $changeVersion_url ) . '">Git Change Branch</a></div>';
 				}else{
-					$changeVersionText = '<div class="change-repo-version"><a href="' . esc_url( $changeVersion_url ) . '">Change Version</a></div>';
+					if( version_compare($gitRepoThemeVersion, $theme['version'], '>' ) ){
+						$changeVersionText = '<div class="change-repo-version change-repo-important"><a href="' . esc_url( $changeVersion_url ) . '">New Version Available</a></div>';
+					}else{
+						$changeVersionText = '<div class="change-repo-version"><a href="' . esc_url( $changeVersion_url ) . '">Git Change Branch</a></div>';
+					}
 				}
+				
+				
 				// Final Output
 				$prepared_themes[$key]['waas1_change_version'] = $changeVersionText;
 				
@@ -378,11 +383,16 @@ add_filter( 'plugin_action_links', function ( $actions, $plugin_file, $plugin_da
 		$gitRepoPluginVersion = $dirs[0];
 	}
 	
-	if( version_compare($gitRepoPluginVersion, $plugin_data['Version'], '>' ) ){
-		$changeVersionText = '<a style="color:red;" href="' . esc_url( $changeVersion_url ) . '">New Version Available</a>';
+	if( $gitRepoPluginVersion == '999.999.999.999.999' ){
+		$changeVersionText = '<a href="' . esc_url( $changeVersion_url ) . '">Git Change Branch</a>';
 	}else{
-		$changeVersionText = '<a href="' . esc_url( $changeVersion_url ) . '">Change Version</a>';
+		if( version_compare($gitRepoPluginVersion, $plugin_data['Version'], '>' ) ){
+			$changeVersionText = '<a style="color:red;" href="' . esc_url( $changeVersion_url ) . '">New Version Available</a>';
+		}else{
+			$changeVersionText = '<a href="' . esc_url( $changeVersion_url ) . '">Git Change Branch</a>';
+		}
 	}
+	
 	
 	// Final Output
 	$actions['waas1_change_version'] = $changeVersionText;
@@ -498,7 +508,7 @@ function waas1_change_version_api_call( $type, $args ){
 	
 	$html = '';
 	$html .= '<div class="wrap"> <div class="wpr-content-wrap">';
-	$html .= '<h1>Change Version: '.$args['rollback_name'].'</h1>';
+	$html .= '<h1>Git Change Branch: '.$args['rollback_name'].'</h1>';
 	
 	
 	//if plugin starts
@@ -695,13 +705,11 @@ function waas1_change_version_show_options( $args ){
 	if ( ( ! isset( $_GET['type'] ) && ! isset( $_GET['theme'] ) ) || ( ! isset( $_GET['type'] ) && ! isset( $_GET['plugin_file'] ) ) ) {
 		wp_die( __( 'Change Version is missing necessary parameters to continue. Please contact support.', 'wp-rollback' ) );
 	}
-	
-	
 
 	
 	$html = '';
 	$html .= '<div class="wrap"> <div class="wpr-content-wrap">';
-	$html .= '<h1>Change Version</h1>';
+	$html .= '<h1>Git Change Branch</h1>';
 	
 	$html .= '<p>'. sprintf( 'Please select which %1$s version you would like to rollback to from the releases listed below. You currently have version %2$s installed of %3$s.', '<span class="type">' . ( $args['type'] == 'theme' ? 'theme' : 'plugin' ) . '</span>', '<span class="current-version">' . esc_html( $args['installed_version'] ) . '</span>', '<span class="rollback-name">' . esc_html( $args['rollback_name'] ) . '</span>' ). '</p>';
 	
@@ -739,7 +747,7 @@ function waas1_change_version_show_options( $args ){
 	  
 	  
 	  $html .='<div class="wpr-submit-wrap">';
-		$html .='<a href="#wpr-modal-confirm" class="magnific-popup button-primary wpr-rollback-disabled">Change version</a>';
+		$html .='<a href="#wpr-modal-confirm" class="magnific-popup button-primary wpr-rollback-disabled">Git Change Branch</a>';
 		$html .='<input type="button" value="Cancel" class="button" onclick="location.href='.wp_get_referer().'" />';
 	  $html .='</div>';
 	  
@@ -800,7 +808,7 @@ function waas1_change_version_show_options( $args ){
 		//$html .='<div class="wpr-error"><p><strong>Notice:</strong> We strongly recommend you <strong>create a complete backup</strong> of your site.</p></div>';
 		
 		$html .='
-				<input type="submit" value="Change version" class="button-primary wpr-go" />
+				<input type="submit" value="Git Change Branch" class="button-primary wpr-go" />
 				<a href="#" class="button wpr-close">Cancel</a>
 			   ';
 		
