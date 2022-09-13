@@ -543,7 +543,7 @@ function waas1_change_version_api_call( $type, $args ){
 		}
 	
 	
-		if( !is_dir(WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.'/'.$args['slug'].'/'.$args['new_version']) ){
+		if( !is_dir(WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.$args['slug'].'/'.$args['new_version']) ){
 			$html .= '<p>Plugin Version not found in our repo! Please contact admin.</p>';
 			$html .= '<p>No action taken...</p>';
 			$html .= '</div></div>';
@@ -609,7 +609,7 @@ function waas1_change_version_api_call( $type, $args ){
 		}
 		
 		
-		if( !is_dir(WAAS1_CHANGE_VERSION_THEME_REPO_DIR.'/'.$args['slug'].'/'.$args['new_version']) ){
+		if( !is_dir(WAAS1_CHANGE_VERSION_THEME_REPO_DIR.$args['slug'].'/'.$args['new_version']) ){
 			$html .= '<p>Theme Version not found in our repo! Please contact admin.</p>';
 			$html .= '<p>No action taken...</p>';
 			$html .= '</div></div>';
@@ -863,12 +863,13 @@ function waas1_change_version_check_if_symlink( $type, $args ){
 
 function waas1_check_if_we_have_repo( $type, $args ){
 	
+	
 	if( $type == 'plugin' ){
 		
-		if( file_exists( WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.'/'.$args['slug'].'/versions.ini' ) ){
+		if( file_exists( WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.$args['slug'].'/.gitworktree' ) ){
 			return true;
 		}
-		if( file_exists( WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.'/'.$args['slug'].'/.gitworktree' ) ){
+		if( file_exists( WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.$args['slug'].'/versions.ini' ) ){
 			return true;
 		}
 		return false;
@@ -877,10 +878,10 @@ function waas1_check_if_we_have_repo( $type, $args ){
 	
 	if( $type == 'theme' ){
 		
-		if( file_exists( WAAS1_CHANGE_VERSION_THEME_REPO_DIR.'/'.$args['slug'].'/versions.ini' ) ){
+		if( file_exists( WAAS1_CHANGE_VERSION_THEME_REPO_DIR.$args['slug'].'/.gitworktree' ) ){
 			return true;
 		}
-		if( file_exists( WAAS1_CHANGE_VERSION_THEME_REPO_DIR.'/'.$args['slug'].'/.gitworktree' ) ){
+		if( file_exists( WAAS1_CHANGE_VERSION_THEME_REPO_DIR.$args['slug'].'/versions.ini' ) ){
 			return true;
 		}
 		return false;
@@ -905,14 +906,13 @@ function waas1_change_version_versions_select( $type, $args ){
 	
 	$dirs = waas1_list_repo_version( $type, $args );
 	
-	
 	$html = '<ul class="wpr-version-list">';
 	$linkedWithMain = false;
 	
 	if( $type == 'plugin' ){
 		
 		foreach( $dirs as $dir ) {
-		   if( is_dir(WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.'/'.$args['slug'].'/'.$dir) ){
+		   if( is_dir(WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.$args['slug'].'/'.$dir) ){
 			   $html .= '<li class="wpr-version-li">';
 				 $html .= '<label>';
 				   $html .= '<input type="radio" value="' .$dir. '" name="new_version">';
@@ -955,7 +955,7 @@ function waas1_change_version_versions_select( $type, $args ){
 	if( $type == 'theme' ){
 		
 		foreach( $dirs as $dir ) {
-		   if( is_dir(WAAS1_CHANGE_VERSION_THEME_REPO_DIR.'/'.$args['slug'].'/'.$dir) ){
+		   if( is_dir(WAAS1_CHANGE_VERSION_THEME_REPO_DIR.$args['slug'].'/'.$dir) ){
 			   $html .= '<li class="wpr-version-li">';
 				 $html .= '<label>';
 				   $html .= '<input type="radio" value="' .$dir. '" name="new_version">';
@@ -1011,26 +1011,38 @@ function waas1_list_repo_version( $type, $args ){
 	
 	if( $type == 'plugin' ){
 		
-		$file = WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.'/'.$args['slug'].'/versions.ini';
+		$file = WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.$args['slug'].'/.gitworktree';
+		$dirToScan = WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.$args['slug'].'/';
+		
+		if( file_exists($file) ){
+			
+			$scanDir = scandir( $dirToScan );
+			$scanDir = array_diff( $scanDir, array( '.', '..' ) );
+			
+			$dirBuilder = array();
+			foreach( $scanDir as $dir ){
+				if( is_dir(WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.$args['slug'].'/'.$dir) ){
+					array_push( $dirBuilder, $dir );
+				}
+			}
+			
+			sort($dirBuilder, SORT_NUMERIC);
+			$dirBuilder = array_reverse( $dirBuilder );
+			
+			
+			if( in_array('main', $dirBuilder) ){
+				array_pop( $dirBuilder ); //remove the last element as main will always be last
+				array_unshift( $dirBuilder , 'main' ); //add the main to the very top now
+			}
+			
+			return $dirBuilder;
+		}
+		
+		//old version file way
+		$file = WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.$args['slug'].'/versions.ini';
 		if( file_exists($file) ){
 			$versions = parse_ini_file( $file, false, INI_SCANNER_TYPED );
 			return $versions['versions'];
-		}
-		
-		$file = WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.'/'.$args['slug'].'/.gitworktree';
-		$dirToScan = WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.'/'.$args['slug'].'/';
-		
-		if( file_exists($file) ){
-			$scanDir = scandir( $dirToScan );
-			$scanDir = array_diff( $scanDir, array( '.', '..', '.gitworktree' ) );
-			sort($scanDir, SORT_NUMERIC);
-			$scanDir = array_reverse( $scanDir );
-			
-			if( in_array('main', $scanDir) ){
-				array_pop( $scanDir ); //remove the last element as main will always be last
-				array_unshift( $scanDir , 'main' ); //add the main to the very top now
-			}
-			return $scanDir;
 		}
 
 	}
@@ -1039,27 +1051,39 @@ function waas1_list_repo_version( $type, $args ){
 	
 	if( $type == 'theme' ){
 		
-		$file = WAAS1_CHANGE_VERSION_THEME_REPO_DIR.'/'.$args['slug'].'/versions.ini';
+		$file = WAAS1_CHANGE_VERSION_THEME_REPO_DIR.$args['slug'].'/.gitworktree';
+		$dirToScan = WAAS1_CHANGE_VERSION_THEME_REPO_DIR.$args['slug'].'/';
+		
+		if( file_exists($file) ){
+			
+			$scanDir = scandir( $dirToScan );
+			$scanDir = array_diff( $scanDir, array( '.', '..' ) );
+			
+			$dirBuilder = array();
+			foreach( $scanDir as $dir ){
+				if( is_dir(WAAS1_CHANGE_VERSION_THEME_REPO_DIR.$args['slug'].'/'.$dir) ){
+					array_push( $dirBuilder, $dir );
+				}
+			}
+			
+
+			sort($dirBuilder, SORT_NUMERIC);
+			$dirBuilder = array_reverse( $dirBuilder );
+			
+			if( in_array('main', $dirBuilder) ){
+				array_pop( $dirBuilder ); //remove the last element as main will always be last
+				array_unshift( $dirBuilder , 'main' ); //add the main to the very top now
+			}
+			
+			return $dirBuilder;
+		}
+		
+		
+		//old version file way
+		$file = WAAS1_CHANGE_VERSION_THEME_REPO_DIR.$args['slug'].'/versions.ini';
 		if( file_exists($file) ){
 			$versions = parse_ini_file( $file, false, INI_SCANNER_TYPED );
 			return $versions['versions'];
-		}
-		
-		$file = WAAS1_CHANGE_VERSION_THEME_REPO_DIR.'/'.$args['slug'].'/.gitworktree';
-		$dirToScan = WAAS1_CHANGE_VERSION_THEME_REPO_DIR.'/'.$args['slug'].'/';
-		$dirToScan = WAAS1_CHANGE_VERSION_THEME_REPO_DIR.'/'.$args['slug'].'/';
-		
-		if( file_exists($file) ){
-			$scanDir = scandir( $dirToScan );
-			$scanDir = array_diff( $scanDir, array( '.', '..', '.gitworktree' ) );
-			sort($scanDir, SORT_NUMERIC);
-			$scanDir = array_reverse( $scanDir );
-			
-			if( in_array('main', $scanDir) ){
-				array_pop( $scanDir ); //remove the last element as main will always be last
-				array_unshift( $scanDir , 'main' ); //add the main to the very top now
-			}
-			return $scanDir;
 		}
 		
 	}
