@@ -31,6 +31,10 @@ WP_CLI::add_command( 'waas1-tenant post-created', function( $args, $assoc_args )
 	do_action( 'waas1_tenant_post_created', $assoc_args );
 });
 
+WP_CLI::add_command( 'waas1-tenant post-cloned', function( $args, $assoc_args ){
+	do_action( 'waas1_tenant_post_cloned', $assoc_args );
+});
+
 WP_CLI::add_command( 'waas1-tenant pre-delete', function( $args, $assoc_args ){
 	do_action( 'waas1_tenant_pre_delete', $assoc_args );
 });
