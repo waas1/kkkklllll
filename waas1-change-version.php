@@ -869,6 +869,12 @@ function waas1_check_if_we_have_repo( $type, $args ){
 		if( file_exists( WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.$args['slug'].'/.gitworktree' ) ){
 			return true;
 		}
+		if( file_exists( WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.$args['slug'].'/gitworktree' ) ){
+			return true;
+		}
+		if( file_exists( WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.$args['slug'].'/gitworktree.txt' ) ){
+			return true;
+		}
 		if( file_exists( WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.$args['slug'].'/versions.ini' ) ){
 			return true;
 		}
@@ -879,6 +885,12 @@ function waas1_check_if_we_have_repo( $type, $args ){
 	if( $type == 'theme' ){
 		
 		if( file_exists( WAAS1_CHANGE_VERSION_THEME_REPO_DIR.$args['slug'].'/.gitworktree' ) ){
+			return true;
+		}
+		if( file_exists( WAAS1_CHANGE_VERSION_THEME_REPO_DIR.$args['slug'].'/gitworktree' ) ){
+			return true;
+		}
+		if( file_exists( WAAS1_CHANGE_VERSION_THEME_REPO_DIR.$args['slug'].'/gitworktree.txt' ) ){
 			return true;
 		}
 		if( file_exists( WAAS1_CHANGE_VERSION_THEME_REPO_DIR.$args['slug'].'/versions.ini' ) ){
@@ -1011,8 +1023,17 @@ function waas1_list_repo_version( $type, $args ){
 	
 	if( $type == 'plugin' ){
 		
-		$file = WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.$args['slug'].'/.gitworktree';
 		$dirToScan = WAAS1_CHANGE_VERSION_PLUGIN_REPO_DIR.$args['slug'].'/';
+		
+		if( file_exists($dirToScan.'.gitworktree') ){
+			$file = $dirToScan.'.gitworktree';
+			
+		}elseif( file_exists($dirToScan.'gitworktree') ){
+			$file = $dirToScan.'gitworktree';
+			
+		}elseif( file_exists($dirToScan.'gitworktree.txt') ){
+			$file = $dirToScan.'gitworktree.txt';
+		}
 		
 		if( file_exists($file) ){
 			
@@ -1051,8 +1072,17 @@ function waas1_list_repo_version( $type, $args ){
 	
 	if( $type == 'theme' ){
 		
-		$file = WAAS1_CHANGE_VERSION_THEME_REPO_DIR.$args['slug'].'/.gitworktree';
 		$dirToScan = WAAS1_CHANGE_VERSION_THEME_REPO_DIR.$args['slug'].'/';
+		
+		if( file_exists($dirToScan.'.gitworktree') ){
+			$file = $dirToScan.'.gitworktree';
+			
+		}elseif( file_exists($dirToScan.'gitworktree') ){
+			$file = $dirToScan.'gitworktree';
+			
+		}elseif( file_exists($dirToScan.'gitworktree.txt') ){
+			$file = $dirToScan.'gitworktree.txt';
+		}
 		
 		if( file_exists($file) ){
 			
